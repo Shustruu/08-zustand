@@ -1,36 +1,50 @@
 'use client';
 
-import type { ChangeEvent, FormEvent } from 'react';
-import type { Draft, NoteStore } from '@/lib/store/noteStore';
-import { useNoteStore } from '@/lib/store/noteStore';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { ChangeEvent, FormEvent } from 'react';
+import toast from 'react-hot-toast';
+
+import { useNoteStore } from '@/lib/store/noteStore';
 import { createNote } from '@/lib/api';
+import type { Draft, NoteStore } from '@/lib/store/noteStore';
 import type { Note } from '@/types/note';
+
 import css from './NoteForm.module.css';
 
-export default function NoteForm() {
+interface NoteFormProps {
+  onClose?: () => void;
+}
+
+export default function NoteForm({ onClose }: NoteFormProps) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
   const draft = useNoteStore((state: NoteStore) => state.draft);
   const setDraft = useNoteStore((state: NoteStore) => state.setDraft);
   const clearDraft = useNoteStore((state: NoteStore) => state.clearDraft);
-  const router = useRouter();
-  const queryClient = useQueryClient();
 
   const mutation = useMutation<Note, Error, Draft>({
     mutationFn: (newNote) => createNote(newNote),
     onSuccess: () => {
+      toast.success('Note created successfully');
       clearDraft();
       queryClient.invalidateQueries({ queryKey: ['notes'] });
-      router.back();
+
+      if (onClose) onClose();
+      else router.back();
+    },
+    onError: () => {
+      toast.error('Failed to create note');
     },
   });
-
-  const isLoading = mutation.status === 'pending';
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     mutation.mutate(draft);
   };
+
+  const isLoading = mutation.status === 'pending';
 
   return (
     <form className={css.form} onSubmit={handleSubmit}>
@@ -86,7 +100,7 @@ export default function NoteForm() {
         <button
           type="button"
           className={css.cancelButton}
-          onClick={() => router.back()}
+          onClick={() => (onClose ? onClose() : router.back())}
           disabled={isLoading}
         >
           Cancel

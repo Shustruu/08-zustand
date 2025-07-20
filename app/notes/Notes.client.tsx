@@ -43,17 +43,17 @@ export default function NotesClient({ initialData }: Props) {
     <div>
       <Toaster />
       <header>
-        <SearchBox value={search} onChange={handleSearch} />
+        <SearchBox inputValue={search} onChange={handleSearch} />
         <button onClick={() => setIsModalOpen(true)}>Create note +</button>
       </header>
 
       {isLoading && <Loader />}
-      {isError && error && <ErrorMessage>{error.message}</ErrorMessage>}
+      {isError && error && <ErrorMessage message={error.message} />}
       {data && data.notes.length > 0 ? (
         <>
           <NoteList notes={data.notes} />
           {data.totalPages > 1 && (
-            <Pagination totalPages={data.totalPages} currentPage={page} onPageChange={setPage} />
+            <Pagination totalPages={data.totalPages} currentPage={page} setPage={setPage} />
           )}
         </>
       ) : (

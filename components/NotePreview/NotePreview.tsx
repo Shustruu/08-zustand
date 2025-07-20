@@ -1,6 +1,6 @@
 'use client';
 
-import { getSingleNote } from '@/lib/api';
+import { fetchNoteById as getSingleNote } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 
 interface Props {

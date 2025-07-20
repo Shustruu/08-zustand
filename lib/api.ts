@@ -75,3 +75,14 @@ export async function fetchNoteById(id: number): Promise<Note> {
     throw new Error("Failed to fetch note details.");
   }
 }
+
+
+export async function getTags(): Promise<string[]> {
+  try {
+    const res = await axios.get<string[]>('/tags');
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching tags:", error);
+    throw new Error("Failed to fetch tags.");
+  }
+}
